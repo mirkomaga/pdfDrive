@@ -22,6 +22,8 @@ namespace pdfDrive
     {
         public static IDictionary<string, string> result = new Dictionary<string, string>();
         public static string data = null;
+        public static string folderDestination = null;
+
         public mainI()
         {
             InitializeComponent();
@@ -32,7 +34,6 @@ namespace pdfDrive
             this.Refresh();
             this.Update();
         }
-
         private void Form1_Load(object sender, EventArgs e)
         {
             this.writeLwIntestatura();
@@ -41,7 +42,6 @@ namespace pdfDrive
         {
 
         }
-
         private void button1_Click(object sender, EventArgs e)
         { 
             string file = this.choosePath("Credenziali (*.json)|*.json");
@@ -53,7 +53,6 @@ namespace pdfDrive
                 Program.googleLogin(file);
             }
         }
-
         private void cbDrive_CheckedChanged(object sender, EventArgs e)
         {
             if (this.cbDrive.Checked == true)
@@ -70,7 +69,6 @@ namespace pdfDrive
                 this.Update();
             }
         }
-
         private string choosePath(string filter)
         {
             string path = "";
@@ -102,7 +100,6 @@ namespace pdfDrive
 
             return filePath;
         }
-
         private void btnPdf_Click(object sender, EventArgs e)
         {
             string file = this.choosePath("Pdf(*.pdf) | *.pdf");
@@ -113,11 +110,9 @@ namespace pdfDrive
                 this.gestiscoPDF(file);
             }
         }
-
         private void btnStart_Click(object sender, EventArgs e)
         {
         }
-        
         private void writeLwIntestatura()
         {
             this.lv1.View = View.Details;
@@ -142,12 +137,10 @@ namespace pdfDrive
             this.lv1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             this.lv1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
-
         private void lv1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
-
         public void gestiscoPDF(string path)
         {
             //var text = new TikaOnDotNet.TextExtraction.TextExtractor().Extract(path).Text.Trim();
@@ -209,15 +202,48 @@ namespace pdfDrive
             }
             reader.Close();
 
-            // RISCRIVO I NUOVI PDF
             this.writeNewPdf();
             // EVENTUALMENTE DRIVE
         }
         private void writeNewPdf()
         {
-            foreach(var sing in mainI.result)
+            if (!string.IsNullOrEmpty(mainI.folderDestination))
             {
-                //SCRIVO NUOVI PDF IN CARTELLA DI DESTINAZIONE
+                foreach(var sing in mainI.result)
+                {
+                    //SCRIVO NUOVI PDF IN CARTELLA DI DESTINAZIONE
+
+                    //iTextSharp.text.Document doc= new iTextSharp.text.Document();
+
+                    //iTextSharp.text.pdf.PdfWriter writer = iTextSharp.text.pdf.PdfWriter.GetInstance(doc,
+                    //    new System.IO.FileStream(mainI.folderDestination + "\\"+sing.Key+".pdf",
+                    //        System.IO.FileMode.Create));
+
+                    using (MemoryStream myMemoryStream = new MemoryStream())
+                    {
+                        iTextSharp.text.Document myDocument = new iTextSharp.text.Document();
+                        PdfWriter myPDFWriter = PdfWriter.GetInstance(myDocument, myMemoryStream);
+
+                        myDocument.Open();
+
+                        PdfPTable table = new PdfPTable(2);
+                        PdfPCell header = new PdfPCell();
+                        header.Colspan = 2;
+                        header.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
+                        table.AddCell(header);
+                        table.AddCell("ID:12");
+                        myDocument.Add(table);
+                        myDocument.Close();
+
+                        byte[] content = myMemoryStream.ToArray();
+
+                        // Write out PDF from memory stream.
+                        using (FileStream fs = File.Create(mainI.folderDestination + "\\" + sing.Key + ".pdf"))
+                        {
+                            fs.Write(content, 0, (int)content.Length);
+                        }
+                    }
+                }
             }
         }
         private IDictionary<string,string> findDataPdf(string str)
@@ -290,7 +316,6 @@ namespace pdfDrive
 
             return "";
         }
-
         private void btnDestF_Click(object sender, EventArgs e)
         {
             using (var fbd = new FolderBrowserDialog())
@@ -301,16 +326,24 @@ namespace pdfDrive
                 {
                     string[] files = Directory.GetFiles(fbd.SelectedPath);
 
-                    System.Windows.Forms.MessageBox.Show("Files found: " + files.Length.ToString(), "Message");
+                    if (files.Length > 0)
+                    {
+                        MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                        DialogResult flrCheck = MessageBox.Show("Cartella non vuota, i file duplicati verranno sostituiti", "Attenzione", buttons);
+                        if (flrCheck == DialogResult.Yes)
+                        {
+                            this.Close();
+                        }
+                        else
+                        {
+                            //simulo il click
+                            this.btnDestF_Click(sender, e);
+                        }
+                    }
+                    mainI.folderDestination = fbd.SelectedPath;
+                    this.lblFoldDest.Text = fbd.SelectedPath;
                 }
             }
-
-            //string folder = this.choosePath("Cartelle |*.");
-
-            //if (!string.IsNullOrEmpty(folder))
-            //{
-            //    this.lblFoldDest.Text = System.IO.Path.GetFileName(folder);
-            //}
         }
     }
 }
