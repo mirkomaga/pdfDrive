@@ -11,6 +11,10 @@ using System.Windows.Forms;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Windows.Forms;
 using System.IO;
+using sun.tools.tree;
+using iTextSharp.text.pdf;
+using iTextSharp.text.pdf.parser;
+using System.Text.RegularExpressions;
 
 namespace pdfDrive
 {
@@ -19,7 +23,7 @@ namespace pdfDrive
         public mainI()
         {
             InitializeComponent();
-            
+
             this.btnJson.Visible = false;
             this.lblJson.Visible = false;
 
@@ -31,7 +35,6 @@ namespace pdfDrive
         {
             this.writeLwIntestatura();
         }
-
         private void label1_Click(object sender, EventArgs e)
         {
 
@@ -105,7 +108,7 @@ namespace pdfDrive
             if (!string.IsNullOrEmpty(file))
             {
                 this.lblPdf.Text = System.IO.Path.GetFileName(file);
-                Program.gestiscoPDF(file);
+                this.gestiscoPDF(file);
             }
         }
 
@@ -143,9 +146,114 @@ namespace pdfDrive
 
         }
 
-        public static void writeLineLv(List<string> msg)
+        public void gestiscoPDF(string path)
         {
-            //scrivo una line nella listview
+            //var text = new TikaOnDotNet.TextExtraction.TextExtractor().Extract(path).Text.Trim();
+
+            PdfReader reader = new PdfReader(path);
+
+            List<String> pdfText = new List<string>();
+            for (int page = 1; page <= reader.NumberOfPages; page++)
+            {
+                ITextExtractionStrategy its = new iTextSharp.text.pdf.parser.LocationTextExtractionStrategy();
+                try
+                {
+                    PdfTextExtractor.GetTextFromPage(reader, page, its);
+                    string strPage = its.GetResultantText();
+                    pdfText.Add(strPage);
+
+                    ListViewItem itm = new ListViewItem("item1", 0);
+                    itm.SubItems.Add("Pdf");
+                    itm.SubItems.Add("Processo pagina: "+ page);
+                    itm.SubItems.Add("ok");
+
+                    this.lv1.Items.AddRange(new ListViewItem[] { itm });
+
+                    IDictionary<string, string> res = this.findDataPdf(strPage);
+                }
+                catch
+                {
+                    ListViewItem itm = new ListViewItem("item1", 0);
+                    itm.SubItems.Add("Pdf");
+                    itm.SubItems.Add("Impossibile leggere pdf.");
+                    itm.SubItems.Add("Ko");
+
+                    this.lv1.Items.AddRange(new ListViewItem[] { itm });
+                }
+            }
+            reader.Close();
+        }
+
+        private IDictionary<string,string> findDataPdf(string str)
+        {
+            IDictionary<string, string> results = new Dictionary<string, string>();
+
+            results["name"] = this.cercaNome(str);
+            results["cognome"] = this.cercaCognome(str);
+            results["data"] = this.cercaData(str);
+
+            return results;
+        }
+
+        private MatchCollection findRegex(string toFind, string regex)
+        {
+            Regex rx = new Regex(regex, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            MatchCollection matches = rx.Matches(toFind);
+            return matches;
+        }
+        private string cercaNome(string toFind)
+        {
+            string rx = @"SESSO([^\n]*\n+)[0-9]{2} ([^>]+) [0-9]{6}[^a-z]{1}([^\n]*\n+)DES";
+            MatchCollection res = this.findRegex(toFind, rx);
+
+            foreach (Match match in res)
+            {
+                GroupCollection groups = match.Groups;
+
+                string nomeCognome = groups[2].ToString();
+
+                string nome = nomeCognome.Split(" ".ToCharArray())[0];
+
+                return nome;
+            }
+
+            return "NONTROVATO";
+        }
+        private string cercaCognome(string toFind)
+        {
+            string rx = @"SESSO([^\n]*\n+)[0-9]{2} ([^>]+) [0-9]{6}[^a-z]{1}([^\n]*\n+)DES";
+            MatchCollection res = this.findRegex(toFind, rx);
+
+            foreach (Match match in res)
+            {
+                GroupCollection groups = match.Groups;
+
+                string nomeCognome = groups[2].ToString();
+
+                string nome = nomeCognome.Split(" ".ToCharArray())[1];
+
+                return nome;
+            }
+
+            return "NONTROVATO";
+        }
+        private string cercaData(string toFind)
+        {
+            string rx = @"[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}([^\n]*\n+)DATA SCATTI";
+            MatchCollection res = this.findRegex(toFind, rx);
+
+            foreach (Match match in res)
+            {
+                GroupCollection groups = match.Groups;
+                string data = groups[1].ToString();
+                string[] allDate = data.Split(" ".ToCharArray());
+
+                string[] result = allDate[allDate.Length - 1].Split("/".ToCharArray());
+
+                return result[2]+ "_" +result[1];
+            }
+
+            return "NONTROVATO";
         }
     }
 }

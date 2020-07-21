@@ -7,17 +7,22 @@ using System.IO;
 using System.Windows.Forms;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
+using com.sun.tools.javac;
+using sun.tools.tree;
 
 namespace pdfDrive
 {
     static class Program
     {
+        public static Form globalForm;
+
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new mainI());
+            globalForm = new mainI();
+            Application.Run(globalForm);
         }
         public static void process()
         {
@@ -26,54 +31,30 @@ namespace pdfDrive
 
         public static bool googleLogin(string path)
         {
+            var stream = new FileStream(path, FileMode.Open, FileAccess.Read);
+            var credentials = GoogleCredential.FromStream(stream);
 
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
-            {
-                var credentials = GoogleCredential.FromStream(stream);
-                if (credentials.IsCreateScopedRequired)
-                {
-                    credentials = credentials.CreateScoped(new string[] { DriveService.Scope.Drive });
-                }
+            //using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            //{
+            //    var credentials = GoogleCredential.FromStream(stream);
+            //    if (credentials.IsCreateScopedRequired)
+            //    {
+            //        credentials = credentials.CreateScoped(new string[] { DriveService.Scope.Drive });
+            //    }
 
-                var service = new DriveService(new BaseClientService.Initializer()
-                {
-                    HttpClientInitializer = credentials,
-                    ApplicationName = "test",
-                });
+            //    var service = new DriveService(new BaseClientService.Initializer()
+            //    {
+            //        HttpClientInitializer = credentials,
+            //        ApplicationName = "Pdf Splitter",
+            //    });
 
-                FilesResource.ListRequest listRequest = service.Files.List();
-                listRequest.Fields = "nextPageToken, files(id, name)";
+            //    FilesResource.ListRequest listRequest = service.Files.List();
+            //    listRequest.Fields = "nextPageToken, files(id, name)";
 
-                IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute().Files;
-            }
+            //    IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute().Files;
+            //}
 
             return false;
-        }
-
-        public static void gestiscoPDF(string path)
-        {
-            //var text = new TikaOnDotNet.TextExtraction.TextExtractor().Extract(path).Text.Trim();
-
-            PdfReader reader = new PdfReader(path);
-            
-            List<String> pdfText = new List<string>();
-            for (int page = 1; page <= reader.NumberOfPages; page++)
-            {
-                ITextExtractionStrategy its = new iTextSharp.text.pdf.parser.LocationTextExtractionStrategy();
-                try
-                {
-                    PdfTextExtractor.GetTextFromPage(reader, page, its);
-                    string strPage = its.GetResultantText();
-                    pdfText.Add(strPage);
-                }
-                catch
-                {
-                    mainI.writeLineLv(new List<string>() { "Pdf" , "Impossibile leggere pdf.", "KO"});
-                }
-            }
-
-            reader.Close();
-            //return text;
         }
     }
 }
