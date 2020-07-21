@@ -38,6 +38,8 @@
             this.pb = new System.Windows.Forms.ToolStripProgressBar();
             this.nameProc = new System.Windows.Forms.ToolStripStatusLabel();
             this.lv1 = new System.Windows.Forms.ListView();
+            this.btnDestF = new System.Windows.Forms.Button();
+            this.lblFoldDest = new System.Windows.Forms.Label();
             this.stsB.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -77,7 +79,7 @@
             // cbDrive
             // 
             this.cbDrive.AutoSize = true;
-            this.cbDrive.Location = new System.Drawing.Point(26, 85);
+            this.cbDrive.Location = new System.Drawing.Point(26, 153);
             this.cbDrive.Name = "cbDrive";
             this.cbDrive.Size = new System.Drawing.Size(96, 17);
             this.cbDrive.TabIndex = 3;
@@ -87,7 +89,7 @@
             // 
             // btnJson
             // 
-            this.btnJson.Location = new System.Drawing.Point(26, 130);
+            this.btnJson.Location = new System.Drawing.Point(26, 198);
             this.btnJson.Name = "btnJson";
             this.btnJson.Size = new System.Drawing.Size(87, 23);
             this.btnJson.TabIndex = 5;
@@ -98,7 +100,7 @@
             // lblJson
             // 
             this.lblJson.AutoSize = true;
-            this.lblJson.Location = new System.Drawing.Point(151, 135);
+            this.lblJson.Location = new System.Drawing.Point(151, 203);
             this.lblJson.Name = "lblJson";
             this.lblJson.Size = new System.Drawing.Size(115, 13);
             this.lblJson.TabIndex = 6;
@@ -109,7 +111,7 @@
             this.stsB.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pb,
             this.nameProc});
-            this.stsB.Location = new System.Drawing.Point(0, 289);
+            this.stsB.Location = new System.Drawing.Point(0, 357);
             this.stsB.Name = "stsB";
             this.stsB.Size = new System.Drawing.Size(504, 22);
             this.stsB.TabIndex = 7;
@@ -130,18 +132,39 @@
             // 
             this.lv1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.lv1.HideSelection = false;
-            this.lv1.Location = new System.Drawing.Point(0, 192);
+            this.lv1.Location = new System.Drawing.Point(0, 260);
             this.lv1.Name = "lv1";
             this.lv1.Size = new System.Drawing.Size(504, 97);
             this.lv1.TabIndex = 8;
             this.lv1.UseCompatibleStateImageBehavior = false;
             this.lv1.SelectedIndexChanged += new System.EventHandler(this.lv1_SelectedIndexChanged);
             // 
+            // btnDestF
+            // 
+            this.btnDestF.Location = new System.Drawing.Point(26, 96);
+            this.btnDestF.Name = "btnDestF";
+            this.btnDestF.Size = new System.Drawing.Size(87, 23);
+            this.btnDestF.TabIndex = 9;
+            this.btnDestF.Text = "Destinazione";
+            this.btnDestF.UseVisualStyleBackColor = true;
+            this.btnDestF.Click += new System.EventHandler(this.btnDestF_Click);
+            // 
+            // lblFoldDest
+            // 
+            this.lblFoldDest.AutoSize = true;
+            this.lblFoldDest.Location = new System.Drawing.Point(151, 101);
+            this.lblFoldDest.Name = "lblFoldDest";
+            this.lblFoldDest.Size = new System.Drawing.Size(142, 13);
+            this.lblFoldDest.TabIndex = 10;
+            this.lblFoldDest.Text = "Nessuna cartella selezionata";
+            // 
             // mainI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(504, 311);
+            this.ClientSize = new System.Drawing.Size(504, 379);
+            this.Controls.Add(this.lblFoldDest);
+            this.Controls.Add(this.btnDestF);
             this.Controls.Add(this.lv1);
             this.Controls.Add(this.stsB);
             this.Controls.Add(this.lblJson);
@@ -173,6 +196,8 @@
         private System.Windows.Forms.ToolStripProgressBar pb;
         private System.Windows.Forms.ToolStripStatusLabel nameProc;
         public System.Windows.Forms.ListView lv1;
+        private System.Windows.Forms.Button btnDestF;
+        private System.Windows.Forms.Label lblFoldDest;
     }
 }
 

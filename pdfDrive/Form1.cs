@@ -20,6 +20,8 @@ namespace pdfDrive
 {
     public partial class mainI : Form
     {
+        public static IDictionary<string, string> result = new Dictionary<string, string>();
+        public static string data = null;
         public mainI()
         {
             InitializeComponent();
@@ -152,7 +154,6 @@ namespace pdfDrive
 
             PdfReader reader = new PdfReader(path);
 
-            List<String> pdfText = new List<string>();
             for (int page = 1; page <= reader.NumberOfPages; page++)
             {
                 ITextExtractionStrategy its = new iTextSharp.text.pdf.parser.LocationTextExtractionStrategy();
@@ -160,30 +161,65 @@ namespace pdfDrive
                 {
                     PdfTextExtractor.GetTextFromPage(reader, page, its);
                     string strPage = its.GetResultantText();
-                    pdfText.Add(strPage);
 
-                    ListViewItem itm = new ListViewItem("item1", 0);
-                    itm.SubItems.Add("Pdf");
-                    itm.SubItems.Add("Processo pagina: "+ page);
-                    itm.SubItems.Add("ok");
-
-                    this.lv1.Items.AddRange(new ListViewItem[] { itm });
+                    //ListViewItem itm = new ListViewItem("Pdf", 0);
+                    //itm.SubItems.Add("Processo pagina: "+ page);
+                    //itm.SubItems.Add("ok");
+                    //this.lv1.Items.AddRange(new ListViewItem[] { itm });
 
                     IDictionary<string, string> res = this.findDataPdf(strPage);
+
+                    if (!string.IsNullOrEmpty((string)res["name"]) && !string.IsNullOrEmpty((string)res["cognome"])&&!string.IsNullOrEmpty((string)res["data"]))
+                    {
+                        //Salvo nome e cognome + pdf
+
+                        string name = (string)res["name"];
+                        string cognome = (string)res["cognome"];
+                        string data = (string)res["data"];
+
+                        if (!mainI.result.ContainsKey(name + " " + cognome))
+                        {
+                            string nameFolder = name + " " + cognome;
+                            mainI.result[nameFolder] = strPage;
+                        }
+                        else
+                        {
+                            // PDF DUPLICATO
+                        }
+
+                        if (string.IsNullOrEmpty(mainI.data))
+                        {
+                            mainI.data = data;
+                        }
+
+                        if (mainI.data != data)
+                        {
+                            // DATE DIVERSE NEL PDF
+                        }
+                    }
                 }
-                catch
+                    catch
                 {
-                    ListViewItem itm = new ListViewItem("item1", 0);
-                    itm.SubItems.Add("Pdf");
+                    ListViewItem itm = new ListViewItem("Pdf", 0);
                     itm.SubItems.Add("Impossibile leggere pdf.");
-                    itm.SubItems.Add("Ko");
+                    itm.SubItems.Add("KO");
 
                     this.lv1.Items.AddRange(new ListViewItem[] { itm });
                 }
             }
             reader.Close();
-        }
 
+            // RISCRIVO I NUOVI PDF
+            this.writeNewPdf();
+            // EVENTUALMENTE DRIVE
+        }
+        private void writeNewPdf()
+        {
+            foreach(var sing in mainI.result)
+            {
+                //SCRIVO NUOVI PDF IN CARTELLA DI DESTINAZIONE
+            }
+        }
         private IDictionary<string,string> findDataPdf(string str)
         {
             IDictionary<string, string> results = new Dictionary<string, string>();
@@ -194,7 +230,6 @@ namespace pdfDrive
 
             return results;
         }
-
         private MatchCollection findRegex(string toFind, string regex)
         {
             Regex rx = new Regex(regex, RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -217,7 +252,7 @@ namespace pdfDrive
                 return nome;
             }
 
-            return "NONTROVATO";
+            return "";
         }
         private string cercaCognome(string toFind)
         {
@@ -235,7 +270,7 @@ namespace pdfDrive
                 return nome;
             }
 
-            return "NONTROVATO";
+            return "";
         }
         private string cercaData(string toFind)
         {
@@ -253,7 +288,29 @@ namespace pdfDrive
                 return result[2]+ "_" +result[1];
             }
 
-            return "NONTROVATO";
+            return "";
+        }
+
+        private void btnDestF_Click(object sender, EventArgs e)
+        {
+            using (var fbd = new FolderBrowserDialog())
+            {
+                DialogResult result = fbd.ShowDialog();
+
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                {
+                    string[] files = Directory.GetFiles(fbd.SelectedPath);
+
+                    System.Windows.Forms.MessageBox.Show("Files found: " + files.Length.ToString(), "Message");
+                }
+            }
+
+            //string folder = this.choosePath("Cartelle |*.");
+
+            //if (!string.IsNullOrEmpty(folder))
+            //{
+            //    this.lblFoldDest.Text = System.IO.Path.GetFileName(folder);
+            //}
         }
     }
 }
