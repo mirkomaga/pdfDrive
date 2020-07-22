@@ -23,6 +23,7 @@ namespace pdfDrive
         public static IDictionary<string, string> result = new Dictionary<string, string>();
         public static string data = null;
         public static string folderDestination = null;
+        public static string pdfPath = null;
 
         public mainI()
         {
@@ -107,11 +108,19 @@ namespace pdfDrive
             if (!string.IsNullOrEmpty(file))
             {
                 this.lblPdf.Text = System.IO.Path.GetFileName(file);
-                this.gestiscoPDF(file);
+                mainI.pdfPath = file;
             }
         }
         private void btnStart_Click(object sender, EventArgs e)
         {
+            if (!string.IsNullOrEmpty(mainI.pdfPath) && !string.IsNullOrEmpty(mainI.folderDestination))
+            {
+                this.gestiscoPDF();
+            }
+            else
+            {
+                // TODO seleziona uno dei due
+            }
         }
         private void writeLwIntestatura()
         {
@@ -141,11 +150,11 @@ namespace pdfDrive
         {
 
         }
-        public void gestiscoPDF(string path)
+        public void gestiscoPDF()
         {
             //var text = new TikaOnDotNet.TextExtraction.TextExtractor().Extract(path).Text.Trim();
 
-            PdfReader reader = new PdfReader(path);
+            PdfReader reader = new PdfReader(mainI.pdfPath);
 
             for (int page = 1; page <= reader.NumberOfPages; page++)
             {
