@@ -15,6 +15,7 @@ using sun.tools.tree;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using System.Text.RegularExpressions;
+using iTextSharp.text;
 
 namespace pdfDrive
 {
@@ -107,7 +108,7 @@ namespace pdfDrive
 
             if (!string.IsNullOrEmpty(file))
             {
-                this.lblPdf.Text = System.IO.Path.GetFileName(file);
+                this.lblPdf.Text = "Nome file: " + System.IO.Path.GetFileName(file);
                 mainI.pdfPath = file;
             }
         }
@@ -159,8 +160,8 @@ namespace pdfDrive
             for (int page = 1; page <= reader.NumberOfPages; page++)
             {
                 ITextExtractionStrategy its = new iTextSharp.text.pdf.parser.LocationTextExtractionStrategy();
-                try
-                {
+                //try
+                //{
                     PdfTextExtractor.GetTextFromPage(reader, page, its);
                     string strPage = its.GetResultantText();
 
@@ -171,18 +172,19 @@ namespace pdfDrive
 
                     IDictionary<string, string> res = this.findDataPdf(strPage);
 
-                    if (!string.IsNullOrEmpty((string)res["name"]) && !string.IsNullOrEmpty((string)res["cognome"])&&!string.IsNullOrEmpty((string)res["data"]))
+                    if (!string.IsNullOrEmpty((string)res["nameCognome"]) && !string.IsNullOrEmpty((string)res["data"]))
                     {
                         //Salvo nome e cognome + pdf
 
-                        string name = (string)res["name"];
-                        string cognome = (string)res["cognome"];
+                        string nameCognome = (string)res["nameCognome"];
                         string data = (string)res["data"];
 
-                        if (!mainI.result.ContainsKey(name + " " + cognome))
+                        if (!mainI.result.ContainsKey(nameCognome))
                         {
-                            string nameFolder = name + " " + cognome;
-                            mainI.result[nameFolder] = strPage;
+                            mainI.result[nameCognome] = strPage;
+
+                            List<string> a = new List<string>();
+                            this.addToLV(a);
                         }
                         else
                         {
@@ -199,15 +201,15 @@ namespace pdfDrive
                             // DATE DIVERSE NEL PDF
                         }
                     }
-                }
-                    catch
-                {
-                    ListViewItem itm = new ListViewItem("Pdf", 0);
-                    itm.SubItems.Add("Impossibile leggere pdf.");
-                    itm.SubItems.Add("KO");
+                //}
+                //    catch
+                //{
+                //    ListViewItem itm = new ListViewItem("Pdf", 0);
+                //    itm.SubItems.Add("Impossibile leggere pdf.");
+                //    itm.SubItems.Add("KO");
 
-                    this.lv1.Items.AddRange(new ListViewItem[] { itm });
-                }
+                //    this.lv1.Items.AddRange(new ListViewItem[] { itm });
+                //}
             }
             reader.Close();
 
@@ -222,12 +224,6 @@ namespace pdfDrive
                 {
                     //SCRIVO NUOVI PDF IN CARTELLA DI DESTINAZIONE
 
-                    //iTextSharp.text.Document doc= new iTextSharp.text.Document();
-
-                    //iTextSharp.text.pdf.PdfWriter writer = iTextSharp.text.pdf.PdfWriter.GetInstance(doc,
-                    //    new System.IO.FileStream(mainI.folderDestination + "\\"+sing.Key+".pdf",
-                    //        System.IO.FileMode.Create));
-
                     using (MemoryStream myMemoryStream = new MemoryStream())
                     {
                         iTextSharp.text.Document myDocument = new iTextSharp.text.Document();
@@ -235,13 +231,8 @@ namespace pdfDrive
 
                         myDocument.Open();
 
-                        PdfPTable table = new PdfPTable(2);
-                        PdfPCell header = new PdfPCell();
-                        header.Colspan = 2;
-                        header.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
-                        table.AddCell(header);
-                        table.AddCell("ID:12");
-                        myDocument.Add(table);
+                        myDocument.Add(new Paragraph(sing.Value));
+
                         myDocument.Close();
 
                         byte[] content = myMemoryStream.ToArray();
@@ -259,8 +250,7 @@ namespace pdfDrive
         {
             IDictionary<string, string> results = new Dictionary<string, string>();
 
-            results["name"] = this.cercaNome(str);
-            results["cognome"] = this.cercaCognome(str);
+            results["nameCognome"] = this.cercaNome(str);
             results["data"] = this.cercaData(str);
 
             return results;
@@ -282,27 +272,7 @@ namespace pdfDrive
 
                 string nomeCognome = groups[2].ToString();
 
-                string nome = nomeCognome.Split(" ".ToCharArray())[0];
-
-                return nome;
-            }
-
-            return "";
-        }
-        private string cercaCognome(string toFind)
-        {
-            string rx = @"SESSO([^\n]*\n+)[0-9]{2} ([^>]+) [0-9]{6}[^a-z]{1}([^\n]*\n+)DES";
-            MatchCollection res = this.findRegex(toFind, rx);
-
-            foreach (Match match in res)
-            {
-                GroupCollection groups = match.Groups;
-
-                string nomeCognome = groups[2].ToString();
-
-                string nome = nomeCognome.Split(" ".ToCharArray())[1];
-
-                return nome;
+                return nomeCognome;
             }
 
             return "";
@@ -320,7 +290,14 @@ namespace pdfDrive
 
                 string[] result = allDate[allDate.Length - 1].Split("/".ToCharArray());
 
-                return result[2]+ "_" +result[1];
+                try
+                {
+                    return result[2] + "_" + result[1];
+                }
+                catch
+                {
+                    return "";
+                }
             }
 
             return "";
@@ -341,7 +318,7 @@ namespace pdfDrive
                         DialogResult flrCheck = MessageBox.Show("Cartella non vuota, i file duplicati verranno sostituiti", "Attenzione", buttons);
                         if (flrCheck == DialogResult.Yes)
                         {
-                            this.Close();
+                            //this.Close();
                         }
                         else
                         {
@@ -350,9 +327,17 @@ namespace pdfDrive
                         }
                     }
                     mainI.folderDestination = fbd.SelectedPath;
-                    this.lblFoldDest.Text = fbd.SelectedPath;
+                    this.lblFoldDest.Text = "Nome cartella: " + System.IO.Path.GetFileName(fbd.SelectedPath);
                 }
             }
+        }
+        private void addToLV(List<string> msg)
+        {
+            ListViewItem lvi = new ListViewItem();
+            lvi.SubItems.Add("SubItem");
+            lvi.SubItems.Add("SubItem");
+            lvi.SubItems.Add("SubItem");
+            lv1.Items.Add(lvi);
         }
     }
 }
