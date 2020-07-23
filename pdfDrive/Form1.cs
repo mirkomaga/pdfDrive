@@ -25,7 +25,6 @@ namespace pdfDrive
         public static string data = null;
         public static string folderDestination = null;
         public static string pdfPath = null;
-
         public mainI()
         {
             InitializeComponent();
@@ -38,6 +37,12 @@ namespace pdfDrive
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            lv1.View = View.Details;
+            lv1.AllowColumnReorder = true;
+            lv1.FullRowSelect = true;
+            lv1.GridLines = true;
+            lv1.OwnerDraw = true;
+            lv1.LabelEdit = false;
             this.writeLwIntestatura();
         }
         private void label1_Click(object sender, EventArgs e)
@@ -52,7 +57,7 @@ namespace pdfDrive
             if (!string.IsNullOrEmpty(file))
             {
                 this.lblJson.Text = System.IO.Path.GetFileName(file);
-                Program.googleLogin(file);
+                GoogleDrive.login(file);
             }
         }
         private void cbDrive_CheckedChanged(object sender, EventArgs e)
@@ -133,10 +138,9 @@ namespace pdfDrive
             this.lv1.GridLines = true;
             this.lv1.Sorting = SortOrder.Ascending;
 
-            ListViewItem item1 = new ListViewItem("item1", 0);
-            item1.SubItems.Add("Avvio");
+            ListViewItem item1 = new ListViewItem("Avvio", 0);
             item1.SubItems.Add("Inizializzato correttamente");
-            item1.SubItems.Add("Ok");
+            item1.SubItems.Add("1");
             
             this.lv1.Columns.Add("Operazione");
             this.lv1.Columns.Add("Messaggio");
@@ -160,61 +164,53 @@ namespace pdfDrive
             for (int page = 1; page <= reader.NumberOfPages; page++)
             {
                 ITextExtractionStrategy its = new iTextSharp.text.pdf.parser.LocationTextExtractionStrategy();
-                //try
-                //{
-                    PdfTextExtractor.GetTextFromPage(reader, page, its);
-                    string strPage = its.GetResultantText();
+                PdfTextExtractor.GetTextFromPage(reader, page, its);
+                string strPage = its.GetResultantText();
+                IDictionary<string, string> res = this.findDataPdf(strPage);
 
-                    //ListViewItem itm = new ListViewItem("Pdf", 0);
-                    //itm.SubItems.Add("Processo pagina: "+ page);
-                    //itm.SubItems.Add("ok");
-                    //this.lv1.Items.AddRange(new ListViewItem[] { itm });
+                if (!string.IsNullOrEmpty((string)res["nameCognome"]) && !string.IsNullOrEmpty((string)res["data"]))
+                {
+                    //Salvo nome e cognome + pdf
 
-                    IDictionary<string, string> res = this.findDataPdf(strPage);
+                    string nameCognome = (string)res["nameCognome"].ToLower();
+                    string data = (string)res["data"];
 
-                    if (!string.IsNullOrEmpty((string)res["nameCognome"]) && !string.IsNullOrEmpty((string)res["data"]))
+                    if (!mainI.result.ContainsKey(nameCognome))
                     {
-                        //Salvo nome e cognome + pdf
+                        mainI.result[nameCognome] = strPage;
 
-                        string nameCognome = (string)res["nameCognome"];
-                        string data = (string)res["data"];
-
-                        if (!mainI.result.ContainsKey(nameCognome))
-                        {
-                            mainI.result[nameCognome] = strPage;
-
-                            List<string> a = new List<string>();
-                            this.addToLV(a);
-                        }
-                        else
-                        {
-                            // PDF DUPLICATO
-                        }
-
-                        if (string.IsNullOrEmpty(mainI.data))
-                        {
-                            mainI.data = data;
-                        }
-
-                        if (mainI.data != data)
-                        {
-                            // DATE DIVERSE NEL PDF
-                        }
+                        List<dynamic> msg = new List<dynamic>();
+                        msg.Add("2");
+                        msg.Add(nameCognome);
+                        msg.Add("1");
+                    this.addToLV(msg);
                     }
-                //}
-                //    catch
-                //{
-                //    ListViewItem itm = new ListViewItem("Pdf", 0);
-                //    itm.SubItems.Add("Impossibile leggere pdf.");
-                //    itm.SubItems.Add("KO");
+                    else
+                    {
+                        // PDF DUPLICATO
+                    }
 
-                //    this.lv1.Items.AddRange(new ListViewItem[] { itm });
-                //}
+                    if (string.IsNullOrEmpty(mainI.data))
+                    {
+                        mainI.data = data;
+                    }
+
+                    if (mainI.data != data)
+                    {
+                        // DATE DIVERSE NEL PDF
+                    }
+                }
             }
             reader.Close();
 
+            //SCRIVO PDF NELLA CARTELLA
             this.writeNewPdf();
+
             // EVENTUALMENTE DRIVE
+            if (this.cbDrive.Checked)
+            {
+                GoogleDrive.uploadOnDrive(mainI.result);
+            }
         }
         private void writeNewPdf()
         {
@@ -238,28 +234,16 @@ namespace pdfDrive
                         byte[] content = myMemoryStream.ToArray();
 
                         // Write out PDF from memory stream.
-                        using (FileStream fs = File.Create(mainI.folderDestination + "\\" + sing.Key + ".pdf"))
+
+                        string nameFile = Regex.Replace(mainI.data, @"\r\n?|\n", "") +"_"+sing.Key+ ".pdf";
+
+                        using (FileStream fs = File.Create(mainI.folderDestination + "\\" + nameFile))
                         {
                             fs.Write(content, 0, (int)content.Length);
                         }
                     }
                 }
             }
-        }
-        private IDictionary<string,string> findDataPdf(string str)
-        {
-            IDictionary<string, string> results = new Dictionary<string, string>();
-
-            results["nameCognome"] = this.cercaNome(str);
-            results["data"] = this.cercaData(str);
-
-            return results;
-        }
-        private MatchCollection findRegex(string toFind, string regex)
-        {
-            Regex rx = new Regex(regex, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            MatchCollection matches = rx.Matches(toFind);
-            return matches;
         }
         private string cercaNome(string toFind)
         {
@@ -331,13 +315,49 @@ namespace pdfDrive
                 }
             }
         }
-        private void addToLV(List<string> msg)
+        private void addToLV(List<dynamic> msg)
         {
-            ListViewItem lvi = new ListViewItem();
-            lvi.SubItems.Add("SubItem");
-            lvi.SubItems.Add("SubItem");
-            lvi.SubItems.Add("SubItem");
+            ListViewItem lvi = new ListViewItem(msg[0], 0);
+            lvi.SubItems.Add(msg[1]);
+            lvi.SubItems.Add(msg[2]);
             lv1.Items.Add(lvi);
+        }
+        private void lv1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
+        {
+            try
+            {
+                e.Graphics.DrawImage(imageList1.Images[int.Parse(e.SubItem.Text)], e.SubItem.Bounds.X, e.SubItem.Bounds.Y, e.Bounds.Height, e.Bounds.Height);
+            }
+            catch
+            {
+                e.Graphics.DrawString(e.SubItem.Text, e.SubItem.Font, Brushes.Black, e.Bounds);
+            }
+        }
+        private void lv1_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
+        {
+            e.DrawDefault = true;
+        }
+        private IDictionary<string, string> findDataPdf(string str)
+        {
+            IDictionary<string, string> results = new Dictionary<string, string>();
+
+            results["nameCognome"] = this.cercaNome(str);
+            results["data"] = this.cercaData(str);
+
+            return results;
+        }
+        private MatchCollection findRegex(string toFind, string regex)
+        {
+            Regex rx = new Regex(regex, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            MatchCollection matches = rx.Matches(toFind);
+            return matches;
+        }
+    }
+    public class MyListView : ListView
+    {
+        protected override void OnDrawSubItem(System.Windows.Forms.DrawListViewSubItemEventArgs e)
+        {
+            base.OnDrawSubItem(e);
         }
     }
 }

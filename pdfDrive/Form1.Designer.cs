@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(mainI));
             this.btnPdf = new System.Windows.Forms.Button();
             this.lblPdf = new System.Windows.Forms.Label();
             this.btnStart = new System.Windows.Forms.Button();
@@ -40,6 +42,7 @@
             this.lv1 = new System.Windows.Forms.ListView();
             this.btnDestF = new System.Windows.Forms.Button();
             this.lblFoldDest = new System.Windows.Forms.Label();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.stsB.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -111,7 +114,7 @@
             this.stsB.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pb,
             this.nameProc});
-            this.stsB.Location = new System.Drawing.Point(0, 357);
+            this.stsB.Location = new System.Drawing.Point(0, 526);
             this.stsB.Name = "stsB";
             this.stsB.Size = new System.Drawing.Size(504, 22);
             this.stsB.TabIndex = 7;
@@ -131,12 +134,16 @@
             // lv1
             // 
             this.lv1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lv1.GridLines = true;
             this.lv1.HideSelection = false;
-            this.lv1.Location = new System.Drawing.Point(0, 260);
+            this.lv1.Location = new System.Drawing.Point(0, 240);
             this.lv1.Name = "lv1";
-            this.lv1.Size = new System.Drawing.Size(504, 97);
+            this.lv1.OwnerDraw = true;
+            this.lv1.Size = new System.Drawing.Size(504, 286);
             this.lv1.TabIndex = 8;
             this.lv1.UseCompatibleStateImageBehavior = false;
+            this.lv1.DrawColumnHeader += new System.Windows.Forms.DrawListViewColumnHeaderEventHandler(this.lv1_DrawColumnHeader);
+            this.lv1.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.lv1_DrawSubItem);
             this.lv1.SelectedIndexChanged += new System.EventHandler(this.lv1_SelectedIndexChanged);
             // 
             // btnDestF
@@ -158,11 +165,19 @@
             this.lblFoldDest.TabIndex = 10;
             this.lblFoldDest.Text = "Nessuna cartella selezionata";
             // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "danger.png");
+            this.imageList1.Images.SetKeyName(1, "success.png");
+            this.imageList1.Images.SetKeyName(2, "pdf.png");
+            // 
             // mainI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(504, 379);
+            this.ClientSize = new System.Drawing.Size(504, 548);
             this.Controls.Add(this.lblFoldDest);
             this.Controls.Add(this.btnDestF);
             this.Controls.Add(this.lv1);
@@ -198,6 +213,7 @@
         public System.Windows.Forms.ListView lv1;
         private System.Windows.Forms.Button btnDestF;
         private System.Windows.Forms.Label lblFoldDest;
+        private System.Windows.Forms.ImageList imageList1;
     }
 }
 
