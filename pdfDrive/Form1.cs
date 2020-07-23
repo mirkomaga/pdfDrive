@@ -209,7 +209,9 @@ namespace pdfDrive
             // EVENTUALMENTE DRIVE
             if (this.cbDrive.Checked)
             {
-                GoogleDrive.uploadOnDrive(mainI.result);
+                var a = GoogleDrive.uploadOnDrive(mainI.result);
+
+
             }
         }
         private void writeNewPdf()
