@@ -38,17 +38,20 @@
             this.lblJson = new System.Windows.Forms.Label();
             this.stsB = new System.Windows.Forms.StatusStrip();
             this.pb = new System.Windows.Forms.ToolStripProgressBar();
-            this.nameProc = new System.Windows.Forms.ToolStripStatusLabel();
             this.lv1 = new System.Windows.Forms.ListView();
             this.btnDestF = new System.Windows.Forms.Button();
             this.lblFoldDest = new System.Windows.Forms.Label();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.stsB.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnPdf
             // 
-            this.btnPdf.Location = new System.Drawing.Point(26, 32);
+            this.btnPdf.Location = new System.Drawing.Point(14, 31);
             this.btnPdf.Name = "btnPdf";
             this.btnPdf.Size = new System.Drawing.Size(87, 23);
             this.btnPdf.TabIndex = 0;
@@ -59,7 +62,7 @@
             // lblPdf
             // 
             this.lblPdf.AutoSize = true;
-            this.lblPdf.Location = new System.Drawing.Point(151, 37);
+            this.lblPdf.Location = new System.Drawing.Point(139, 36);
             this.lblPdf.Name = "lblPdf";
             this.lblPdf.Size = new System.Drawing.Size(115, 13);
             this.lblPdf.TabIndex = 1;
@@ -71,7 +74,7 @@
             this.btnStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnStart.BackColor = System.Drawing.Color.Transparent;
             this.btnStart.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.btnStart.Location = new System.Drawing.Point(382, 32);
+            this.btnStart.Location = new System.Drawing.Point(386, 36);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(75, 23);
             this.btnStart.TabIndex = 2;
@@ -82,7 +85,7 @@
             // cbDrive
             // 
             this.cbDrive.AutoSize = true;
-            this.cbDrive.Location = new System.Drawing.Point(26, 153);
+            this.cbDrive.Location = new System.Drawing.Point(14, 32);
             this.cbDrive.Name = "cbDrive";
             this.cbDrive.Size = new System.Drawing.Size(96, 17);
             this.cbDrive.TabIndex = 3;
@@ -92,7 +95,7 @@
             // 
             // btnJson
             // 
-            this.btnJson.Location = new System.Drawing.Point(26, 198);
+            this.btnJson.Location = new System.Drawing.Point(14, 77);
             this.btnJson.Name = "btnJson";
             this.btnJson.Size = new System.Drawing.Size(87, 23);
             this.btnJson.TabIndex = 5;
@@ -103,7 +106,7 @@
             // lblJson
             // 
             this.lblJson.AutoSize = true;
-            this.lblJson.Location = new System.Drawing.Point(151, 203);
+            this.lblJson.Location = new System.Drawing.Point(139, 82);
             this.lblJson.Name = "lblJson";
             this.lblJson.Size = new System.Drawing.Size(115, 13);
             this.lblJson.TabIndex = 6;
@@ -112,9 +115,8 @@
             // stsB
             // 
             this.stsB.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.pb,
-            this.nameProc});
-            this.stsB.Location = new System.Drawing.Point(0, 526);
+            this.pb});
+            this.stsB.Location = new System.Drawing.Point(0, 527);
             this.stsB.Name = "stsB";
             this.stsB.Size = new System.Drawing.Size(504, 22);
             this.stsB.TabIndex = 7;
@@ -125,21 +127,15 @@
             this.pb.Name = "pb";
             this.pb.Size = new System.Drawing.Size(100, 16);
             // 
-            // nameProc
-            // 
-            this.nameProc.Name = "nameProc";
-            this.nameProc.Size = new System.Drawing.Size(61, 17);
-            this.nameProc.Text = "Nome File";
-            // 
             // lv1
             // 
             this.lv1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.lv1.GridLines = true;
             this.lv1.HideSelection = false;
-            this.lv1.Location = new System.Drawing.Point(0, 240);
+            this.lv1.Location = new System.Drawing.Point(0, 282);
             this.lv1.Name = "lv1";
             this.lv1.OwnerDraw = true;
-            this.lv1.Size = new System.Drawing.Size(504, 286);
+            this.lv1.Size = new System.Drawing.Size(504, 245);
             this.lv1.TabIndex = 8;
             this.lv1.UseCompatibleStateImageBehavior = false;
             this.lv1.DrawColumnHeader += new System.Windows.Forms.DrawListViewColumnHeaderEventHandler(this.lv1_DrawColumnHeader);
@@ -148,7 +144,7 @@
             // 
             // btnDestF
             // 
-            this.btnDestF.Location = new System.Drawing.Point(26, 96);
+            this.btnDestF.Location = new System.Drawing.Point(14, 86);
             this.btnDestF.Name = "btnDestF";
             this.btnDestF.Size = new System.Drawing.Size(87, 23);
             this.btnDestF.TabIndex = 9;
@@ -159,7 +155,7 @@
             // lblFoldDest
             // 
             this.lblFoldDest.AutoSize = true;
-            this.lblFoldDest.Location = new System.Drawing.Point(151, 101);
+            this.lblFoldDest.Location = new System.Drawing.Point(139, 91);
             this.lblFoldDest.Name = "lblFoldDest";
             this.lblFoldDest.Size = new System.Drawing.Size(142, 13);
             this.lblFoldDest.TabIndex = 10;
@@ -169,31 +165,56 @@
             // 
             this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
             this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList1.Images.SetKeyName(0, "danger.png");
-            this.imageList1.Images.SetKeyName(1, "success.png");
-            this.imageList1.Images.SetKeyName(2, "pdf.png");
+            this.imageList1.Images.SetKeyName(0, "icons8-warning-48.ico");
+            this.imageList1.Images.SetKeyName(1, "icons8-segno-di-spunta-64.ico");
+            this.imageList1.Images.SetKeyName(2, "icons8-pdf-48.ico");
+            this.imageList1.Images.SetKeyName(3, "Google-Drive-icon.ico");
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.btnPdf);
+            this.groupBox1.Controls.Add(this.lblFoldDest);
+            this.groupBox1.Controls.Add(this.lblPdf);
+            this.groupBox1.Controls.Add(this.btnDestF);
+            this.groupBox1.Controls.Add(this.btnStart);
+            this.groupBox1.Location = new System.Drawing.Point(12, 12);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(480, 124);
+            this.groupBox1.TabIndex = 11;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "PDF";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.cbDrive);
+            this.groupBox2.Controls.Add(this.btnJson);
+            this.groupBox2.Controls.Add(this.lblJson);
+            this.groupBox2.Location = new System.Drawing.Point(12, 142);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(480, 124);
+            this.groupBox2.TabIndex = 12;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Google Drive";
             // 
             // mainI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(504, 548);
-            this.Controls.Add(this.lblFoldDest);
-            this.Controls.Add(this.btnDestF);
+            this.ClientSize = new System.Drawing.Size(504, 549);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.lv1);
             this.Controls.Add(this.stsB);
-            this.Controls.Add(this.lblJson);
-            this.Controls.Add(this.btnJson);
-            this.Controls.Add(this.cbDrive);
-            this.Controls.Add(this.btnStart);
-            this.Controls.Add(this.lblPdf);
-            this.Controls.Add(this.btnPdf);
-            this.MinimumSize = new System.Drawing.Size(520, 350);
+            this.MinimumSize = new System.Drawing.Size(520, 588);
             this.Name = "mainI";
             this.Text = "Splitter";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.stsB.ResumeLayout(false);
             this.stsB.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -209,11 +230,12 @@
         private System.Windows.Forms.Label lblJson;
         private System.Windows.Forms.StatusStrip stsB;
         private System.Windows.Forms.ToolStripProgressBar pb;
-        private System.Windows.Forms.ToolStripStatusLabel nameProc;
         public System.Windows.Forms.ListView lv1;
         private System.Windows.Forms.Button btnDestF;
         private System.Windows.Forms.Label lblFoldDest;
         private System.Windows.Forms.ImageList imageList1;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBox2;
     }
 }
 

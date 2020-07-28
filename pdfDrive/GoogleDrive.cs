@@ -21,7 +21,7 @@ namespace pdfDrive
 {
     class GoogleDrive
     {
-        static string[] Scopes = { DriveService.Scope.DriveReadonly };
+        static string[] Scopes = { DriveService.Scope.DriveFile, DriveService.Scope.DriveReadonly };
         private static DriveService service;
         public static void login(string pathCredential)
         {
@@ -47,7 +47,6 @@ namespace pdfDrive
             });
 
         }
-
         public static IList<Google.Apis.Drive.v3.Data.File> listFolderDrive()
         {
             GoogleDrive.login(@"C:\\cred.json");
@@ -64,8 +63,20 @@ namespace pdfDrive
             return fldrs;
         }
 
+        public static bool statusToken()
+        {
+
+            if (System.IO.Directory.Exists("token.json"))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         private static string GetMimeType(string fileName) { string mimeType = "application/unknown"; string ext = System.IO.Path.GetExtension(fileName).ToLower(); Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(ext); if (regKey != null && regKey.GetValue("Content Type") != null) mimeType = regKey.GetValue("Content Type").ToString(); System.Diagnostics.Debug.WriteLine(mimeType); return mimeType; }
-        public static Google.Apis.Drive.v3.Data.File uploadOnDrive(IDictionary<string, string> listaPdf)
+        public static Google.Apis.Drive.v3.Data.File uploadOnDrive(IDictionary<string, string> listaPdf, ListView lv)
         {
             IList<Google.Apis.Drive.v3.Data.File> fldrs = GoogleDrive.listFolderDrive();
 
@@ -76,45 +87,43 @@ namespace pdfDrive
 
                 if (listaPdf.ContainsKey(name.ToLower()))
                 {
+                    string path = listaPdf[name];
+
                     Google.Apis.Drive.v3.Data.File body = new Google.Apis.Drive.v3.Data.File();
-                    body.Name = System.IO.Path.GetFileName("C:\\2020_06_piana alberto.pdf");
-                    //body.Description = "boh";
-                    //body.MimeType = GetMimeType(_uploadFile);
+                    body.Name = System.IO.Path.GetFileName(@path);
+                    body.MimeType = GetMimeType(@path);
                     body.Parents = new List<string> { tag };
-                    byte[] byteArray = System.IO.File.ReadAllBytes("C:\\2020_06_piana alberto.pdf");
+                    byte[] byteArray = System.IO.File.ReadAllBytes(@path);
                     System.IO.MemoryStream stream = new System.IO.MemoryStream(byteArray);
                     try
                     {
-                        FilesResource.CreateMediaUpload request = GoogleDrive.service.Files.Create(body, stream, GetMimeType("C:\\2020_06_piana alberto.pdf"));
+                        FilesResource.CreateMediaUpload request = GoogleDrive.service.Files.Create(body, stream, body.MimeType);
                         request.SupportsTeamDrives = true;
-                        // You can bind event handler with progress changed event and response recieved(completed event)
-                        //request.ProgressChanged += Request_ProgressChanged;
-                        //request.ResponseReceived += Request_ResponseReceived;
                         request.Upload();
-                        return request.ResponseBody;
+
+
+
+                        ListViewItem item1 = new ListViewItem("3", 0);
+                        item1.SubItems.Add(name);
+                        item1.SubItems.Add("1");
+
+                        lv.Items.AddRange(new ListViewItem[] { item1 });
                     }
                     catch (Exception e)
                     {
-                        MessageBox.Show(e.Message, "Error Occured");
-                        return null;
+                        ListViewItem item1 = new ListViewItem("Drive", 0);
+                        item1.SubItems.Add(name);
+                        item1.SubItems.Add("0");
+
+                        lv.Items.AddRange(new ListViewItem[] { item1 });
                     }
+                }
+                else
+                {
+                    var dioboia = name;
                 }
             }
             return null;
         }
-
-        //private void Request_ProgressChanged(Google.Apis.Upload.IUploadProgress obj)
-        //{
-        //    textBox2.Text += obj.Status + " " + obj.BytesSent;
-        //}
-
-        //private void Request_ResponseReceived(Google.Apis.Drive.v3.Data.File obj)
-        //{
-        //    if (obj != null)
-        //    {
-        //        MessageBox.Show("File was uploaded sucessfully--" + obj.Id);
-        //    }
-        //}
-
     }
 }

@@ -11,11 +11,18 @@ using System.Windows.Forms;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Windows.Forms;
 using System.IO;
+
 using sun.tools.tree;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using System.Text.RegularExpressions;
 using iTextSharp.text;
+using org.apache.tika.metadata;
+using PdfSharp.Drawing;
+using BaseLib.Graphic;
+using SelectPdf;
+using org.omg.CosNaming.NamingContextExtPackage;
+using thredds.filesystem;
 
 namespace pdfDrive
 {
@@ -64,11 +71,24 @@ namespace pdfDrive
         {
             if (this.cbDrive.Checked == true)
             {
-                this.btnJson.Visible = true;
-                this.lblJson.Visible = true;
+                if (GoogleDrive.statusToken())
+                {
+                    this.lblJson.Visible = true;
+                    this.btnJson.Visible = true;
+                    this.btnJson.Enabled = false;
+
+                    this.lblJson.Text = "Token già creato";
+                }
+                else
+                {
+                    this.btnJson.Visible = true;
+                    this.lblJson.Visible = true;
+                }
                 this.Refresh();
                 this.Update();
-            }else
+
+            }
+            else
             {
                 this.btnJson.Visible = false;
                 this.lblJson.Visible = false;
@@ -138,15 +158,9 @@ namespace pdfDrive
             this.lv1.GridLines = true;
             this.lv1.Sorting = SortOrder.Ascending;
 
-            ListViewItem item1 = new ListViewItem("Avvio", 0);
-            item1.SubItems.Add("Inizializzato correttamente");
-            item1.SubItems.Add("1");
-            
             this.lv1.Columns.Add("Operazione");
             this.lv1.Columns.Add("Messaggio");
             this.lv1.Columns.Add("Stato");
-
-            this.lv1.Items.AddRange(new ListViewItem[] { item1});
 
             this.lv1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             this.lv1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
@@ -177,17 +191,22 @@ namespace pdfDrive
 
                     if (!mainI.result.ContainsKey(nameCognome))
                     {
-                        mainI.result[nameCognome] = strPage;
+                        mainI.result[nameCognome] = importPage(reader, page, nameCognome);
 
-                        List<dynamic> msg = new List<dynamic>();
-                        msg.Add("2");
-                        msg.Add(nameCognome);
-                        msg.Add("1");
-                    this.addToLV(msg);
+                        ListViewItem item1 = new ListViewItem("2", 0);
+                        item1.SubItems.Add(nameCognome);
+                        item1.SubItems.Add("1");
+
+                        lv1.Items.AddRange(new ListViewItem[] { item1 });
                     }
                     else
                     {
                         // PDF DUPLICATO
+                        ListViewItem item1 = new ListViewItem("2", 0);
+                        item1.SubItems.Add(nameCognome);
+                        item1.SubItems.Add("0");
+
+                        lv1.Items.AddRange(new ListViewItem[] { item1 });
                     }
 
                     if (string.IsNullOrEmpty(mainI.data))
@@ -203,54 +222,46 @@ namespace pdfDrive
             }
             reader.Close();
 
-            //SCRIVO PDF NELLA CARTELLA
-            this.writeNewPdf();
 
             // EVENTUALMENTE DRIVE
             if (this.cbDrive.Checked)
             {
-                var a = GoogleDrive.uploadOnDrive(mainI.result);
-
-
+                var a = GoogleDrive.uploadOnDrive(mainI.result, lv1);
             }
         }
-        private void writeNewPdf()
+        public static string importPage(PdfReader reader, int nPage, string name)
         {
-            if (!string.IsNullOrEmpty(mainI.folderDestination))
+            string path = folderDestination+"\\"+name+".pdf";
+
+            if (!string.IsNullOrEmpty(path))
             {
-                foreach(var sing in mainI.result)
-                {
-                    //SCRIVO NUOVI PDF IN CARTELLA DI DESTINAZIONE
+                Document sourceDocument = null;
+                PdfCopy pdfCopyProvider = null;
+                PdfImportedPage importedPage = null;
 
-                    using (MemoryStream myMemoryStream = new MemoryStream())
-                    {
-                        iTextSharp.text.Document myDocument = new iTextSharp.text.Document();
-                        PdfWriter myPDFWriter = PdfWriter.GetInstance(myDocument, myMemoryStream);
+                sourceDocument = new Document(reader.GetPageSizeWithRotation(1));
+                pdfCopyProvider = new PdfCopy(sourceDocument, new System.IO.FileStream(@path, System.IO.FileMode.Create));
 
-                        myDocument.Open();
+                sourceDocument.Open();
 
-                        myDocument.Add(new Paragraph(sing.Value));
+                importedPage = pdfCopyProvider.GetImportedPage(reader, nPage);
+                pdfCopyProvider.AddPage(importedPage);
 
-                        myDocument.Close();
-
-                        byte[] content = myMemoryStream.ToArray();
-
-                        // Write out PDF from memory stream.
-
-                        string nameFile = Regex.Replace(mainI.data, @"\r\n?|\n", "") +"_"+sing.Key+ ".pdf";
-
-                        using (FileStream fs = File.Create(mainI.folderDestination + "\\" + nameFile))
-                        {
-                            fs.Write(content, 0, (int)content.Length);
-                        }
-                    }
-                }
+                sourceDocument.Close();
             }
+
+            return path;
         }
         private string cercaNome(string toFind)
         {
             string rx = @"SESSO([^\n]*\n+)[0-9]{2} ([^>]+) [0-9]{6}[^a-z]{1}([^\n]*\n+)DES";
             MatchCollection res = this.findRegex(toFind, rx);
+
+            if (res.Count == 0)
+            {
+                rx = @"SESSO([^\n]*\n+)[0-9]{1} ([^>]+) [0-9]{6}[^a-z]{1}([^\n]*\n+)DES";
+                res = this.findRegex(toFind, rx);
+            }
 
             foreach (Match match in res)
             {
@@ -334,6 +345,8 @@ namespace pdfDrive
             {
                 e.Graphics.DrawString(e.SubItem.Text, e.SubItem.Font, Brushes.Black, e.Bounds);
             }
+
+            lv1.EnsureVisible(lv1.Items.Count - 1);
         }
         private void lv1_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
         {
