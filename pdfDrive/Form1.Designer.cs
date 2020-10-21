@@ -205,6 +205,8 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.lv1);
             this.Controls.Add(this.stsB);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximumSize = new System.Drawing.Size(520, 588);
             this.MinimumSize = new System.Drawing.Size(520, 588);
             this.Name = "mainI";
             this.Text = "Splitter";

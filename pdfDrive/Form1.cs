@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using Microsoft.WindowsAPICodePack.Dialogs;
-using System.Windows.Forms;
 using System.IO;
 
 using sun.tools.tree;
@@ -19,7 +18,6 @@ using System.Text.RegularExpressions;
 using iTextSharp.text;
 using org.apache.tika.metadata;
 using PdfSharp.Drawing;
-using BaseLib.Graphic;
 using SelectPdf;
 using org.omg.CosNaming.NamingContextExtPackage;
 using thredds.filesystem;
