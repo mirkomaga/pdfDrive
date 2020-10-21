@@ -37,6 +37,7 @@ namespace pdfDrive
             this.btnJson.Visible = false;
             this.lblJson.Visible = false;
             this.cleanToken.Visible = false;
+            this.checkBoxCreateFolder.Visible = false;
 
             this.Refresh();
             this.Update();
@@ -63,7 +64,7 @@ namespace pdfDrive
             if (!string.IsNullOrEmpty(file))
             {
                 this.lblJson.Text = System.IO.Path.GetFileName(file);
-                GoogleDrive.login(file);
+                GoogleDrive.login(file, true);
             }
 
             refreshTokenInput();
@@ -83,6 +84,8 @@ namespace pdfDrive
                     this.btnJson.Enabled = false;
                     this.cleanToken.Visible = true;
                     this.cleanToken.Enabled = true;
+                    this.checkBoxCreateFolder.Enabled = true;
+                    this.checkBoxCreateFolder.Visible = true;
 
                     this.lblJson.Text = "Token già creato";
                 }
@@ -94,6 +97,8 @@ namespace pdfDrive
                     this.btnJson.Enabled = true;
 
                     this.cleanToken.Enabled = false;
+                    this.checkBoxCreateFolder.Visible = true;
+                    this.checkBoxCreateFolder.Enabled = false;
 
                     this.lblJson.Text = "Nessun file selezionato";
                 }
@@ -106,6 +111,7 @@ namespace pdfDrive
                 this.btnJson.Visible = false;
                 this.lblJson.Visible = false;
                 this.cleanToken.Visible = false;
+                this.checkBoxCreateFolder.Visible = false;
                 this.Refresh();
                 this.Update();
             }
@@ -153,6 +159,9 @@ namespace pdfDrive
         }
         private void btnStart_Click(object sender, EventArgs e)
         {
+
+            mainI.folderDestination = tmpFolder();
+
             if (!string.IsNullOrEmpty(mainI.pdfPath) && !string.IsNullOrEmpty(mainI.folderDestination))
             {
                 this.gestiscoPDF();
@@ -161,6 +170,39 @@ namespace pdfDrive
             {
                 // TODO seleziona uno dei due
             }
+            tmpFolder();
+        }
+        private string tmpFolder()
+        {
+            string path = @"C:\\TmpPdf";
+
+            try
+            {
+                // Creo cartella
+                if (!Directory.Exists(path))
+                {
+                    DirectoryInfo di = Directory.CreateDirectory(path);
+                }
+                else
+                {
+                    System.IO.DirectoryInfo di = new DirectoryInfo(path);
+
+                    foreach (FileInfo file in di.GetFiles())
+                    {
+                        file.Delete();
+                    }
+                    foreach (DirectoryInfo dir in di.GetDirectories())
+                    {
+                        dir.Delete(true);
+                    }
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Impossibile creare folder temporanea", "Folder temporanea");
+            }
+
+            return path;
         }
         private void writeLwIntestatura()
         {
@@ -172,16 +214,12 @@ namespace pdfDrive
             this.lv1.GridLines = true;
             this.lv1.Sorting = SortOrder.Ascending;
 
-            this.lv1.Columns.Add("Operazione");
-            this.lv1.Columns.Add("Messaggio");
-            this.lv1.Columns.Add("Stato");
+            //this.lv1.Columns.Add("Operazione");
+            //this.lv1.Columns.Add("Messaggio");
+            //this.lv1.Columns.Add("Stato");
 
-            this.lv1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            this.lv1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
-        }
-        private void lv1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
+            //this.lv1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            //this.lv1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
         public void gestiscoPDF()
         {
@@ -212,6 +250,8 @@ namespace pdfDrive
                         item1.SubItems.Add("1");
 
                         lv1.Items.AddRange(new ListViewItem[] { item1 });
+
+                        lv1.EnsureVisible(lv1.Items.Count - 1);
                     }
                     else
                     {
@@ -221,6 +261,8 @@ namespace pdfDrive
                         item1.SubItems.Add("0");
 
                         lv1.Items.AddRange(new ListViewItem[] { item1 });
+
+                        lv1.EnsureVisible(lv1.Items.Count - 1);
                     }
 
                     if (string.IsNullOrEmpty(mainI.data))
@@ -240,7 +282,7 @@ namespace pdfDrive
             // EVENTUALMENTE DRIVE
             if (this.cbDrive.Checked)
             {
-                var a = GoogleDrive.uploadOnDrive(mainI.result, lv1);
+                var a = GoogleDrive.uploadOnDrive(mainI.result, lv1, checkBoxCreateFolder.Checked);
             }
         }
         public static string importPage(PdfReader reader, int nPage, string name)
@@ -313,35 +355,7 @@ namespace pdfDrive
 
             return "";
         }
-        private void btnDestF_Click(object sender, EventArgs e)
-        {
-            using (var fbd = new FolderBrowserDialog())
-            {
-                DialogResult result = fbd.ShowDialog();
-
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
-                {
-                    string[] files = Directory.GetFiles(fbd.SelectedPath);
-
-                    if (files.Length > 0)
-                    {
-                        MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                        DialogResult flrCheck = MessageBox.Show("Cartella non vuota, i file duplicati verranno sostituiti", "Attenzione", buttons);
-                        if (flrCheck == DialogResult.Yes)
-                        {
-                            //this.Close();
-                        }
-                        else
-                        {
-                            //simulo il click
-                            this.btnDestF_Click(sender, e);
-                        }
-                    }
-                    mainI.folderDestination = fbd.SelectedPath;
-                    this.lblFoldDest.Text = "Nome cartella: " + System.IO.Path.GetFileName(fbd.SelectedPath);
-                }
-            }
-        }
+        
         private void addToLV(List<dynamic> msg)
         {
             ListViewItem lvi = new ListViewItem(msg[0], 0);
@@ -360,7 +374,6 @@ namespace pdfDrive
                 e.Graphics.DrawString(e.SubItem.Text, e.SubItem.Font, Brushes.Black, e.Bounds);
             }
 
-            lv1.EnsureVisible(lv1.Items.Count - 1);
         }
         private void lv1_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
         {
@@ -405,6 +418,11 @@ namespace pdfDrive
                 MessageBox.Show("Non è stato possibile eliminare la cartella", "Delete Cache");
             }
             refreshTokenInput();
+        }
+
+        private void checkBoxCreateFolder_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
     public class MyListView : ListView

@@ -14,6 +14,9 @@ using System.Reflection;
 using System.Text;
 using Google.Apis.Analytics.v3;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
+using System.Globalization;
+
 
 namespace pdfDrive
 {
@@ -24,10 +27,18 @@ namespace pdfDrive
         [STAThread]
         static void Main()
         {
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             globalForm = new mainI();
             Application.Run(globalForm);
         }
+
+
+        public static string ToTitleCase(this string title)
+        {
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(title.ToLower());
+        }
     }
+    
 }
