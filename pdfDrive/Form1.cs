@@ -36,6 +36,7 @@ namespace pdfDrive
 
             this.btnJson.Visible = false;
             this.lblJson.Visible = false;
+            this.cleanToken.Visible = false;
 
             this.Refresh();
             this.Update();
@@ -64,8 +65,14 @@ namespace pdfDrive
                 this.lblJson.Text = System.IO.Path.GetFileName(file);
                 GoogleDrive.login(file);
             }
+
+            refreshTokenInput();
         }
         private void cbDrive_CheckedChanged(object sender, EventArgs e)
+        {
+            refreshTokenInput();
+        }
+        public void refreshTokenInput()
         {
             if (this.cbDrive.Checked == true)
             {
@@ -74,6 +81,8 @@ namespace pdfDrive
                     this.lblJson.Visible = true;
                     this.btnJson.Visible = true;
                     this.btnJson.Enabled = false;
+                    this.cleanToken.Visible = true;
+                    this.cleanToken.Enabled = true;
 
                     this.lblJson.Text = "Token già creato";
                 }
@@ -81,6 +90,12 @@ namespace pdfDrive
                 {
                     this.btnJson.Visible = true;
                     this.lblJson.Visible = true;
+                    this.cleanToken.Visible = true;
+                    this.btnJson.Enabled = true;
+
+                    this.cleanToken.Enabled = false;
+
+                    this.lblJson.Text = "Nessun file selezionato";
                 }
                 this.Refresh();
                 this.Update();
@@ -90,6 +105,7 @@ namespace pdfDrive
             {
                 this.btnJson.Visible = false;
                 this.lblJson.Visible = false;
+                this.cleanToken.Visible = false;
                 this.Refresh();
                 this.Update();
             }
@@ -103,7 +119,7 @@ namespace pdfDrive
 
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.InitialDirectory = "c:\\";
+                openFileDialog.InitialDirectory = "Desktop";
                 openFileDialog.Filter = filter;
                 openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;
@@ -364,6 +380,31 @@ namespace pdfDrive
             Regex rx = new Regex(regex, RegexOptions.Compiled | RegexOptions.IgnoreCase);
             MatchCollection matches = rx.Matches(toFind);
             return matches;
+        }
+
+        private void cleanToken_Click(object sender, EventArgs e)
+        {
+
+            try
+            {
+                System.IO.DirectoryInfo di = new DirectoryInfo(@"C:\\token.json");
+
+                foreach (FileInfo file in di.GetFiles())
+                {
+                    file.Delete();
+                }
+                foreach (DirectoryInfo dir in di.GetDirectories())
+                {
+                    dir.Delete(true);
+                }
+                Directory.Delete(@"C:\\token.json");
+                MessageBox.Show("Eliminato correttamente", "Delete Cache");
+            }
+            catch
+            {
+                MessageBox.Show("Non è stato possibile eliminare la cartella", "Delete Cache");
+            }
+            refreshTokenInput();
         }
     }
     public class MyListView : ListView

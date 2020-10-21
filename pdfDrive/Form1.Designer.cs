@@ -44,6 +44,7 @@
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.cleanToken = new System.Windows.Forms.Button();
             this.stsB.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -186,6 +187,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.cleanToken);
             this.groupBox2.Controls.Add(this.cbDrive);
             this.groupBox2.Controls.Add(this.btnJson);
             this.groupBox2.Controls.Add(this.lblJson);
@@ -195,6 +197,16 @@
             this.groupBox2.TabIndex = 12;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Google Drive";
+            // 
+            // cleanToken
+            // 
+            this.cleanToken.Location = new System.Drawing.Point(386, 77);
+            this.cleanToken.Name = "cleanToken";
+            this.cleanToken.Size = new System.Drawing.Size(75, 23);
+            this.cleanToken.TabIndex = 7;
+            this.cleanToken.Text = "Elimina";
+            this.cleanToken.UseVisualStyleBackColor = true;
+            this.cleanToken.Click += new System.EventHandler(this.cleanToken_Click);
             // 
             // mainI
             // 
@@ -238,6 +250,7 @@
         private System.Windows.Forms.ImageList imageList1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
+        public System.Windows.Forms.Button cleanToken;
     }
 }
 

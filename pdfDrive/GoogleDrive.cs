@@ -16,6 +16,8 @@ using org.apache.poi.hwpf.model.types;
 using sun.swing.plaf.windows;
 using File = Google.Apis.Drive.v3.Data.File;
 using System.Windows.Forms;
+using System.Reflection;
+using Google.Apis.Auth.OAuth2.Requests;
 
 namespace pdfDrive
 {
@@ -23,16 +25,19 @@ namespace pdfDrive
     {
         static string[] Scopes = { DriveService.Scope.DriveFile, DriveService.Scope.DriveReadonly };
         private static DriveService service;
+
+        private static string pathOfMe = System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location);
+
         public static void login(string pathCredential)
         {
             UserCredential credential;
 
             //using (var stream =new FileStream(@"C:\\cred.json", FileMode.Open, FileAccess.Read))
-            using (var stream =new FileStream(@pathCredential, FileMode.Open, FileAccess.Read))
+            using (var stream =new FileStream(@"C:\\cred.json", FileMode.Open, FileAccess.Read))
             {
                 // The file token.json stores the user's access and refresh tokens, and is created
                 // automatically when the authorization flow completes for the first time.
-                string credPath = "token.json";
+                string credPath = @"C:\\token.json";
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
                     Scopes,
@@ -50,7 +55,7 @@ namespace pdfDrive
         }
         public static IList<Google.Apis.Drive.v3.Data.File> listFolderDrive()
         {
-            GoogleDrive.login(@"C:\\cred.json");
+            GoogleDrive.login(@"C:\\token.json");
 
             IDictionary<string, string> res = new Dictionary<string, string>();
 
@@ -66,8 +71,7 @@ namespace pdfDrive
 
         public static bool statusToken()
         {
-
-            if (System.IO.Directory.Exists("token.json"))
+            if (System.IO.Directory.Exists(@"C:\\token.json"))
             {
                 return true;
             }
