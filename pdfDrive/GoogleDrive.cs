@@ -24,15 +24,12 @@ namespace pdfDrive
     class GoogleDrive
     {
         static string[] Scopes = { DriveService.Scope.DriveFile, DriveService.Scope.DriveReadonly };
-        private static DriveService service;
 
-        private static string pathOfMe = System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location);
+        private static DriveService service;
 
         public static void login(string @pathCredential, bool save)
         {
             UserCredential credential;
-
-            //using (var stream =new FileStream(@"C:\\cred.json", FileMode.Open, FileAccess.Read))
 
             if (save) 
             {
@@ -65,6 +62,22 @@ namespace pdfDrive
             });
 
         }
+
+        public static bool statusToken()
+        {
+            if (System.IO.Directory.Exists(@"C:\\token.json"))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private static string GetMimeType(string fileName) { string mimeType = "application/unknown"; string ext = System.IO.Path.GetExtension(fileName).ToLower(); Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(ext); if (regKey != null && regKey.GetValue("Content Type") != null) mimeType = regKey.GetValue("Content Type").ToString(); System.Diagnostics.Debug.WriteLine(mimeType); return mimeType; 
+        }
+
         public static IList<Google.Apis.Drive.v3.Data.File> listFolderDrive()
         {
             GoogleDrive.login("C:\\token.json\\cred.json", false);
@@ -81,19 +94,6 @@ namespace pdfDrive
             return fldrs;
         }
 
-        public static bool statusToken()
-        {
-            if (System.IO.Directory.Exists(@"C:\\token.json"))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        private static string GetMimeType(string fileName) { string mimeType = "application/unknown"; string ext = System.IO.Path.GetExtension(fileName).ToLower(); Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(ext); if (regKey != null && regKey.GetValue("Content Type") != null) mimeType = regKey.GetValue("Content Type").ToString(); System.Diagnostics.Debug.WriteLine(mimeType); return mimeType; 
-        }
         private static IList<Google.Apis.Drive.v3.Data.File> creaCartelleInesistenti(IList<Google.Apis.Drive.v3.Data.File> fldrs, IDictionary<string, string> listaPdf, ListView lv) 
         {
 
@@ -133,7 +133,8 @@ namespace pdfDrive
             }
             return listFolderDrive();
         }
-        public static Google.Apis.Drive.v3.Data.File uploadOnDrive(IDictionary<string, string> listaPdf, ListView lv, bool createFolder)
+
+        public static Google.Apis.Drive.v3.Data.File uploadOnDrive(IDictionary<string, string> listaPdf, ListView lv, bool createFolder, ToolStripProgressBar pb)
         {
             IList<Google.Apis.Drive.v3.Data.File> fldrs = GoogleDrive.listFolderDrive();
 
@@ -147,6 +148,10 @@ namespace pdfDrive
 
             List<ListViewItem> lwi = new List<ListViewItem>();
 
+            pb.Value = 0;
+
+            pb.Maximum = listaPdf.Count;
+
             foreach (var fld in fldrs)
             {
                 string name = fld.Name.ToLower();
@@ -158,7 +163,7 @@ namespace pdfDrive
 
                     Google.Apis.Drive.v3.Data.File body = new Google.Apis.Drive.v3.Data.File();
 
-                    body.Name = mainI.data + "_" + System.IO.Path.GetFileName(@path).ToUpper();
+                    body.Name = mainI.data + "_" + Program.gestiscoNome(System.IO.Path.GetFileName(@path).ToUpper())+".pdf";
 
                     body.MimeType = GetMimeType(@path);
                     body.Parents = new List<string> { tag };
@@ -179,6 +184,8 @@ namespace pdfDrive
                         lwi.Add(item1);
 
                         tmpPdfAggiunti.Add(name);
+
+                        pb.Value = pb.Value + 1;
                     }
                     catch (Exception e)
                     {
@@ -187,6 +194,8 @@ namespace pdfDrive
                         item1.SubItems.Add("0");
 
                         lv.Items.AddRange(new ListViewItem[] { item1 });
+
+                        pb.Value = pb.Value + 1;
                     }
                 }
             }

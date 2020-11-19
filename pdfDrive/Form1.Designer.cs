@@ -39,14 +39,14 @@
             this.stsB = new System.Windows.Forms.StatusStrip();
             this.pb = new System.Windows.Forms.ToolStripProgressBar();
             this.lv1 = new System.Windows.Forms.ListView();
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.cleanToken = new System.Windows.Forms.Button();
-            this.checkBoxCreateFolder = new System.Windows.Forms.CheckBox();
             this.a = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.b = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.c = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.checkBoxCreateFolder = new System.Windows.Forms.CheckBox();
+            this.cleanToken = new System.Windows.Forms.Button();
             this.stsB.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -149,6 +149,21 @@
             this.lv1.DrawColumnHeader += new System.Windows.Forms.DrawListViewColumnHeaderEventHandler(this.lv1_DrawColumnHeader);
             this.lv1.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.lv1_DrawSubItem);
             // 
+            // a
+            // 
+            this.a.Text = "Operazione";
+            this.a.Width = 74;
+            // 
+            // b
+            // 
+            this.b.Text = "Messaggio";
+            this.b.Width = 235;
+            // 
+            // c
+            // 
+            this.c.Text = "Stato";
+            this.c.Width = 374;
+            // 
             // imageList1
             // 
             this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
@@ -183,16 +198,6 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Google Drive";
             // 
-            // cleanToken
-            // 
-            this.cleanToken.Location = new System.Drawing.Point(386, 77);
-            this.cleanToken.Name = "cleanToken";
-            this.cleanToken.Size = new System.Drawing.Size(75, 23);
-            this.cleanToken.TabIndex = 7;
-            this.cleanToken.Text = "Elimina";
-            this.cleanToken.UseVisualStyleBackColor = true;
-            this.cleanToken.Click += new System.EventHandler(this.cleanToken_Click);
-            // 
             // checkBoxCreateFolder
             // 
             this.checkBoxCreateFolder.AutoSize = true;
@@ -204,20 +209,15 @@
             this.checkBoxCreateFolder.UseVisualStyleBackColor = true;
             this.checkBoxCreateFolder.CheckedChanged += new System.EventHandler(this.checkBoxCreateFolder_CheckedChanged);
             // 
-            // a
+            // cleanToken
             // 
-            this.a.Text = "Operazione";
-            this.a.Width = 41;
-            // 
-            // b
-            // 
-            this.b.Text = "Messaggio";
-            this.b.Width = 235;
-            // 
-            // c
-            // 
-            this.c.Text = "Stato";
-            this.c.Width = 374;
+            this.cleanToken.Location = new System.Drawing.Point(386, 77);
+            this.cleanToken.Name = "cleanToken";
+            this.cleanToken.Size = new System.Drawing.Size(75, 23);
+            this.cleanToken.TabIndex = 7;
+            this.cleanToken.Text = "Elimina";
+            this.cleanToken.UseVisualStyleBackColor = true;
+            this.cleanToken.Click += new System.EventHandler(this.cleanToken_Click);
             // 
             // mainI
             // 

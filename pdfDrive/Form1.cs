@@ -42,6 +42,7 @@ namespace pdfDrive
             this.Refresh();
             this.Update();
         }
+
         private void Form1_Load(object sender, EventArgs e)
         {
             lv1.View = View.Details;
@@ -52,10 +53,12 @@ namespace pdfDrive
             lv1.LabelEdit = false;
             this.writeLwIntestatura();
         }
+
         private void label1_Click(object sender, EventArgs e)
         {
 
         }
+
         private void button1_Click(object sender, EventArgs e)
         { 
             string file = this.choosePath("Credenziali (*.json)|*.json");
@@ -69,10 +72,12 @@ namespace pdfDrive
 
             refreshTokenInput();
         }
+
         private void cbDrive_CheckedChanged(object sender, EventArgs e)
         {
             refreshTokenInput();
         }
+
         public void refreshTokenInput()
         {
             if (this.cbDrive.Checked == true)
@@ -116,6 +121,7 @@ namespace pdfDrive
                 this.Update();
             }
         }
+
         private string choosePath(string filter)
         {
             string path = "";
@@ -147,6 +153,7 @@ namespace pdfDrive
 
             return filePath;
         }
+
         private void btnPdf_Click(object sender, EventArgs e)
         {
             string file = this.choosePath("Pdf(*.pdf) | *.pdf");
@@ -157,6 +164,7 @@ namespace pdfDrive
                 mainI.pdfPath = file;
             }
         }
+
         private void btnStart_Click(object sender, EventArgs e)
         {
 
@@ -172,9 +180,10 @@ namespace pdfDrive
             }
             tmpFolder();
         }
+
         private string tmpFolder()
         {
-            string path = @"C:\\TmpPdf";
+            string path = @"C:\TmpPdf";
 
             try
             {
@@ -204,6 +213,7 @@ namespace pdfDrive
 
             return path;
         }
+
         private void writeLwIntestatura()
         {
             this.lv1.View = View.Details;
@@ -221,6 +231,7 @@ namespace pdfDrive
             //this.lv1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             //this.lv1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         }
+
         public void gestiscoPDF()
         {
             //var text = new TikaOnDotNet.TextExtraction.TextExtractor().Extract(path).Text.Trim();
@@ -238,8 +249,8 @@ namespace pdfDrive
                 {
                     //Salvo nome e cognome + pdf
 
-                    string nameCognome = (string)res["nameCognome"].ToLower();
-                    string data = (string)res["data"];
+                    string nameCognome = ((string)res["nameCognome"].ToLower()).Trim();
+                    string data = ((string)res["data"]).Trim();
 
                     if (!mainI.result.ContainsKey(nameCognome))
                     {
@@ -267,7 +278,7 @@ namespace pdfDrive
 
                     if (string.IsNullOrEmpty(mainI.data))
                     {
-                        mainI.data = data;
+                        mainI.data = data.Trim();
                     }
 
                     if (mainI.data != data)
@@ -282,21 +293,25 @@ namespace pdfDrive
             // EVENTUALMENTE DRIVE
             if (this.cbDrive.Checked)
             {
-                var a = GoogleDrive.uploadOnDrive(mainI.result, lv1, checkBoxCreateFolder.Checked);
+                var a = GoogleDrive.uploadOnDrive(mainI.result, lv1, checkBoxCreateFolder.Checked, pb);
             }
+
+            MessageBox.Show("Procedimento terminato", "PdfDrive");
         }
+
         public static string importPage(PdfReader reader, int nPage, string name)
         {
             string path = folderDestination+"\\"+name+".pdf";
 
+            
             if (!string.IsNullOrEmpty(path))
             {
-                Document sourceDocument = null;
-                PdfCopy pdfCopyProvider = null;
+                Document sourceDocument;
+                PdfCopy pdfCopyProvider;
                 PdfImportedPage importedPage = null;
 
                 sourceDocument = new Document(reader.GetPageSizeWithRotation(1));
-                pdfCopyProvider = new PdfCopy(sourceDocument, new System.IO.FileStream(@path, System.IO.FileMode.Create));
+                pdfCopyProvider = (PdfCopy)new PdfCopy(sourceDocument, new System.IO.FileStream(path, System.IO.FileMode.Create));
 
                 sourceDocument.Open();
 
@@ -306,8 +321,10 @@ namespace pdfDrive
                 sourceDocument.Close();
             }
 
+
             return path;
         }
+
         private string cercaNome(string toFind)
         {
             string rx = @"SESSO([^\n]*\n+)[0-9]{2} ([^>]+) [0-9]{6}[^a-z]{1}([^\n]*\n+)DES";
@@ -330,6 +347,7 @@ namespace pdfDrive
 
             return "";
         }
+
         private string cercaData(string toFind)
         {
             string rx = @"[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}([^\n]*\n+)DATA SCATTI";
@@ -345,7 +363,7 @@ namespace pdfDrive
 
                 try
                 {
-                    return result[2] + "_" + result[1];
+                    return ((string)result[2]).Trim() + "_" + ((string)result[1]).Trim();
                 }
                 catch
                 {
@@ -363,6 +381,7 @@ namespace pdfDrive
             lvi.SubItems.Add(msg[2]);
             lv1.Items.Add(lvi);
         }
+
         private void lv1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
             try
@@ -375,10 +394,12 @@ namespace pdfDrive
             }
 
         }
+
         private void lv1_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
         {
             e.DrawDefault = true;
         }
+
         private IDictionary<string, string> findDataPdf(string str)
         {
             IDictionary<string, string> results = new Dictionary<string, string>();
@@ -388,6 +409,7 @@ namespace pdfDrive
 
             return results;
         }
+
         private MatchCollection findRegex(string toFind, string regex)
         {
             Regex rx = new Regex(regex, RegexOptions.Compiled | RegexOptions.IgnoreCase);

@@ -39,6 +39,19 @@ namespace pdfDrive
         {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(title.ToLower());
         }
+
+        public static string gestiscoNome(this string title)
+        {
+            String[] elements = System.Text.RegularExpressions.Regex.Split(title, " ");
+            try
+            {
+                return elements[0] + "_" + elements[1][0] + "";
+            }
+            catch
+            {
+                return "ERRORACCIO";
+            }
+        }
     }
     
 }
